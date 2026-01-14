@@ -1,0 +1,46 @@
+(function() {
+    // 1. Grab all words from the screen. 
+    // This selector works for most modern typing sites.
+    const wordElements = document.querySelectorAll('.word, .token');
+    
+    // Convert the elements into a single string separated by spaces
+    const textToType = Array.from(wordElements)
+        .map(el => el.innerText.trim())
+        .join(' ') + ' '; // Add a space at the end
+
+    console.log("Found text to type: ", textToType);
+
+    let i = 0;
+    const target = document.querySelector('input') || document.activeElement;
+
+    // 2. The Typing Logic
+    const typer = setInterval(() => {
+        if (i < textToType.length) {
+            const char = textToType[i];
+            
+            // Create Keyboard Events
+            const eventObj = {
+                key: char,
+                keyCode: char.charCodeAt(0),
+                which: char.charCodeAt(0),
+                bubbles: true
+            };
+
+            // Dispatch events to the site's input listener
+            target.dispatchEvent(new KeyboardEvent('keydown', eventObj));
+            
+            // Specifically for sites that track the value of the input
+            if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
+                target.value += char;
+            }
+
+            target.dispatchEvent(new InputEvent('input', { data: char, bubbles: true }));
+            target.dispatchEvent(new KeyboardEvent('keyup', eventObj));
+            
+            i++;
+        } else {
+            clearInterval(typer);
+            console.log("All lines completed!");
+        }
+    }, 90); // 40ms is roughly 150-160 WPM. Decrease to 10 for "God speed".
+})();
